@@ -1,3 +1,3 @@
 import app
 
-home = app.app()
+home = app.run()
