@@ -1,3 +1,3 @@
 import app
 
-home = index()
+home = app.app()
