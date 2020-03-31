@@ -63,13 +63,16 @@ def url(song_name):
 def get(url):
     session = HTMLSession()
     r = session.get(url)
-    singer = r.html.find("div[class='wwUB2c PZPZlf'] span a", first=True)
-    name = r.html.find(".gsmt span", first=True)
-    temp = r.html.find("span[jsname='YS01Ge']")
-    lyrics = []
-    for l in temp:
-        lyrics.append(l.text)
-    return {"song_name": name.text, "singer_name": singer.text, "lyrics": lyrics}
+    try:
+        singer = r.html.find("div[class='wwUB2c PZPZlf'] span a", first=True)
+        name = r.html.find(".gsmt span", first=True)
+        temp = r.html.find("span[jsname='YS01Ge']")
+        lyrics = []
+        for l in temp:
+            lyrics.append(l.text)
+        return {"song_name": name.text, "singer_name": singer.text, "lyrics": lyrics}
+    except:
+        return "oops"
 
 song_schema = SongSchema()
 # Routing Section
@@ -87,16 +90,27 @@ def get_lyrics():
             print("Fetching From Google.")
             url_ = url(name)
             a = get(url_)
-            # print("a goes here",a)
-            # print(type(a))
-            song = Song(name=a['song_name'], singer=a['singer_name'], lyrics=str(a['lyrics']))
-            # print("song from getlyrics", song)
-            # print(type(song))
-            db.session.add(song)
-            db.session.commit()
-            print("Here list all db song",db)
+            if a != "oops":
+                print(a)
+                # print("a goes here",a)
+                # print(type(a))song_name
+                song = Song(name=a['song_name'], singer=a['singer_name'], lyrics=str(a['lyrics']))
+                # print("song from getlyrics", song)
+                # print(type(song))
+                db.session.add(song)
+                db.session.commit()
+                print("Here list all db song",db)
             # json_encode(a, JSON_UNESCAPED_UNICODE)
-            return jsonify(a)
+            # return jsonify(a)
+                songName = a['song_name']
+                singerName =  a['singer_name']
+                songLyrics = str(a['lyrics'])[1:-1].replace(',','<br>').replace("'"," ")
+                print("songLyrics")
+                print(a)
+            # try:
+                return render_template('show.html',sL=songLyrics,sN=songName,sSN=singerName)
+            else:
+                return render_template('404.html')
     else: 
         return "<h2> STUPID, what you think, are you Smart ? <strong> Go Back </strong> </h2>"
 
